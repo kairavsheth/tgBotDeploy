@@ -246,4 +246,4 @@ if __name__ == '__main__':
     bot.set_webhook(url='65.0.74.5/webhook',
                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
 
-    app.run(port=8080, ssl_context=(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV), debug=True)
+    app.run(host='0.0.0.0', port=8080, ssl_context=(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV), debug=True)
