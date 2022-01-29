@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Upload File</h3>
+<form method="POST" enctype="multipart/form-data">
+    <input hidden name="stage" value="upload">
+    <label for="file">Upload CSV or Excel File: </label><br>
+    <input id="file" name="file" type="file" accept="application/vnd.ms-excel,text/csv" required/><br>
+    <input type="submit"/>
+</form>
+{% endblock %}

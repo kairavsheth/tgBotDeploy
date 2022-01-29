@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Server status: Active</h3>
+<table border="1" style="width:100%;vertical-align:top">
+    <tr>
+        <td style="width:50%;vertical-align:top">
+            <h3>Missing Images</h3>
+            <table border="1" style="width:100%;border-collapse:collapse;border:1">
+                {% for i in missingImages %}
+                {% if loop.index%5==1 %}
+                <tr>
+                    {% endif %}
+                    <td style="width:25%;">{{ i }}</td>
+                {% if loop.index%5==0 %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+        </td>
+        <td style="width:50%;vertical-align:top">
+            <h3>Hidden Categories</h3>
+            <table border="1" style="width:100%;border-collapse:collapse;border:1">
+                {% for i in hiddenCategories %}
+                {% if loop.index%5==1 %}
+                <tr>
+                    {% endif %}
+                    <td style="width:25%;">{{ i }}</td>
+                {% if loop.index%5==0 %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
+</table>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Upload Images</h3>
+<p>
+    Note: File Name should be in the format "&lt;item_name&gt;.jpeg".<br>
+    Incase of multiple images for same product, File Name should be in the format "&lt;item_name&gt; (&lt;number&gt;).jpeg" where number is the order in which images will be sent.
+</p>
+<form method="POST" enctype="multipart/form-data">
+    <label for="file">Upload Images in .jpeg format: </label><br>
+    <input id="file" name="file" type="file" accept="image/jpeg" required multiple/><br>
+    <input type="submit"/>
+</form>
+{% endblock %}

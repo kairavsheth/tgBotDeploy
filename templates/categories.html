@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Categories</h3>
+<form method="post">
+    <table border="1">
+        <tr>
+            <th><b>Category</b></th>
+            <th><b>Parent</b></th>
+        </tr>
+        {% for i in new %}
+        <tr>
+            <td>{{ i }}</td>
+            <td><select onchange="document.getElementById('sucessMessage').innerHTML='';" name="{{ i }}">
+                <option selected>Hidden</option>
+                {% for j in parents %}
+                <option>{{ j }}</option>
+                {% endfor %}
+            </select></td>
+        </tr>
+        {% endfor %}
+        {% for i, row in existing.iterrows() %}
+        <tr>
+            <td>{{ row.category }}</td>
+            <td><select onchange="document.getElementById('sucessMessage').innerHTML='';" name="{{ row.category }}">
+                <option>Hidden</option>
+                {% for j in parents %}
+                {% if row.parent == j %}
+                <option selected>{{ j }}</option>
+                {% else %}
+                <option>{{ j }}</option>
+                {% endif %}
+                {% endfor %}
+            </select></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

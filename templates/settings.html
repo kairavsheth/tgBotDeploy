@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Settings</h3>
+<form method="post">
+    <table>
+        <tr>
+            <td><label for="wctxt">Welcome Message: </label></td>
+            <td><textarea id="wctxt" name="welcome_text" style="width: 400px; height: 130px;" required>{{ welcome_text }}</textarea></td>
+        </tr>
+        <tr>
+            <td><label for="parents">Parent Categories:</label> <br>One in each line.</td>
+            <td><textarea id="parents" name="parents" style="width: 400px; height: 130px;" required>{{ '\n'.join(parents) }}</textarea></td>
+        </tr>
+    </table>
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

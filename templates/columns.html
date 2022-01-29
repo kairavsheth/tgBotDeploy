@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Map Columns</h3>
+<form method="post">
+    <input hidden name="stage" value="columns">
+    <table border="1">
+        <tr>
+            <th>System Field</th>
+            <th>Column in uploaded file</th>
+        </tr>
+        {% for i in ['item', 'category', 'price', 'set', 'stock'] %}
+        <tr>
+            <td>{{ i }}</td>
+            <td><select name="{{ i }}" required>
+                <option selected disabled hidden value="">Select</option>
+                {% for j in columns %}
+                <option>{{ j }}</option>
+                {% endfor %}}
+            </select></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="submit" value="Update">
+</form>
+{% endblock %}
