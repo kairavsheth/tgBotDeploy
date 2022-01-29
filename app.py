@@ -5,7 +5,7 @@ import shutil
 import time
 
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 from flask_httpauth import HTTPBasicAuth
 from telebot import TeleBot
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Update
@@ -149,14 +149,14 @@ def passwordPage():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    if flask.request.headers.get('content-type') == 'application/json':
+    if request.headers.get('content-type') == 'application/json':
         print('recieved')
         json_string = request.get_data().decode('utf-8')
         update = Update.de_json(json_string)
         bot.process_new_updates([update])
         return ''
     else:
-        flask.abort(403)
+        abort(403)
 
 
 @bot.message_handler(commands=['start'])
