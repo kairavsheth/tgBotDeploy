@@ -233,11 +233,6 @@ def standard(message: Message):
     bot.send_message(chat_id=message.chat.id, text='Please send /start and use the buttons to operate the chatbot.')
 
 
-class tgThread(threading.Thread):
-    def run(self) -> None:
-        bot.infinity_polling()
-
-
 if __name__ == '__main__':
     bot.remove_webhook()
 
