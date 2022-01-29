@@ -150,7 +150,6 @@ def passwordPage():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
-        print('recieved')
         json_string = request.get_data().decode('utf-8')
         update = Update.de_json(json_string)
         bot.process_new_updates([update])
@@ -162,12 +161,9 @@ def webhook():
 @app.route('/webhook', methods=['GET'])
 def setWebhook():
     bot.remove_webhook()
-
     time.sleep(0.1)
-
-    # Set webhook
-    bot.set_webhook(url='https://65.0.74.5/webhook',
-                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
+    bot.set_webhook(url='https://65.0.74.5/webhook', certificate=open(WEBHOOK_SSL_CERT, 'r'))
+    return 'Webhook set.'
 
 
 @bot.message_handler(commands=['start'])
