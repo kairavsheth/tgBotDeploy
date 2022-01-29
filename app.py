@@ -11,9 +11,14 @@ from flask_httpauth import HTTPBasicAuth
 from telebot import TeleBot
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Update
 from werkzeug.security import check_password_hash, generate_password_hash
+from OpenSSL import SSL
+context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
 
 WEBHOOK_SSL_CERT = 'webhook_cert.pem'  # Path to the ssl certificate
 WEBHOOK_SSL_PRIV = 'webhook_pkey.pem'  # Path to the ssl private key
+
+context.use_privatekey_file(WEBHOOK_SSL_PRIV)
+context.use_certificate_file(WEBHOOK_SSL_CERT)
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -245,7 +250,7 @@ if __name__ == '__main__':
     time.sleep(0.1)
 
     # Set webhook
-    bot.set_webhook(url='http://65.0.74.5:80/webhook',
+    bot.set_webhook(url='https://65.0.74.5/webhook',
                     certificate=open(WEBHOOK_SSL_CERT, 'r'))
 
     app.run(host='0.0.0.0', port=8080, ssl_context=(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV), debug=True)
