@@ -159,6 +159,17 @@ def webhook():
         abort(403)
 
 
+@app.route('/webhook', methods=['POST'])
+def setWebhook():
+    bot.remove_webhook()
+
+    time.sleep(0.1)
+
+    # Set webhook
+    bot.set_webhook(url='https://65.0.74.5/webhook',
+                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
+
+
 @bot.message_handler(commands=['start'])
 def startChat(message: Message):
     keyboard = [[InlineKeyboardButton(text=i,
@@ -234,12 +245,4 @@ def standard(message: Message):
 
 
 if __name__ == '__main__':
-    bot.remove_webhook()
-
-    time.sleep(0.1)
-
-    # Set webhook
-    bot.set_webhook(url='https://65.0.74.5/webhook',
-                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
-
     app.run(host='0.0.0.0', port=8080, ssl_context=(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV), debug=True)
