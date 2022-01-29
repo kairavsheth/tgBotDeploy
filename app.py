@@ -159,7 +159,7 @@ def webhook():
         abort(403)
 
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['GET'])
 def setWebhook():
     bot.remove_webhook()
 
