@@ -7,9 +7,12 @@ import threading
 import pandas as pd
 from flask import Flask, render_template, request
 from flask_httpauth import HTTPBasicAuth
-from telebot import TeleBot
+from telebot import TeleBot, Update
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from werkzeug.security import check_password_hash, generate_password_hash
+
+WEBHOOK_SSL_CERT = 'webhook_cert.pem'  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = 'webhook_pkey.pem'  # Path to the ssl private key
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -133,8 +136,6 @@ def imagesPage():
 def passwordPage():
     if request.method == 'POST':
         users: dict = pickle.load(open('users.bin', 'rb'))
-        print(request.form)
-        print(users)
         if not check_password_hash(users[auth.current_user()], request.form['old']):
             return render_template('password.html', message='Old Password INCORRECT. Try again.')
         if not request.form['new'] == request.form['confirm']:
@@ -144,6 +145,17 @@ def passwordPage():
         pickle.dump(users, open('users.bin', 'wb'))
         return render_template('password.html', message='Password changed.')
     return render_template('password.html')
+
+
+@app.route('webhook', methods=['POST'])
+def webhook():
+    if flask.request.headers.get('content-type') == 'application/json':
+        json_string = flask.request.get_data().decode('utf-8')
+        update = Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        flask.abort(403)
 
 
 @bot.message_handler(commands=['start'])
@@ -225,14 +237,13 @@ class tgThread(threading.Thread):
         bot.infinity_polling()
 
 
-class flaskThread(threading.Thread):
-    def run(self) -> None:
-        app.run(port=8080)
-
-
 if __name__ == '__main__':
-    tg = tgThread()
-    tg.start()
+    bot.remove_webhook()
 
-    fl = flaskThread()
-    fl.start()
+    time.sleep(0.1)
+
+    # Set webhook
+    bot.set_webhook(url='65.0.74.5/webhook',
+                    certificate=open(WEBHOOK_SSL_CERT, 'r'))
+
+    app.run(port=8080, ssl_context=(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV), debug=True)
