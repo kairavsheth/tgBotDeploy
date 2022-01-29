@@ -147,7 +147,7 @@ def passwordPage():
     return render_template('password.html')
 
 
-@app.route('webhook', methods=['POST'])
+@app.route('/webhook', methods=['POST'])
 def webhook():
     if flask.request.headers.get('content-type') == 'application/json':
         json_string = flask.request.get_data().decode('utf-8')
