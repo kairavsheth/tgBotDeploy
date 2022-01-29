@@ -11,8 +11,8 @@ from telebot import TeleBot
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Update
 from werkzeug.security import check_password_hash, generate_password_hash
 
-WEBHOOK_SSL_CERT = 'webhook_cert.pem'  # Path to the ssl certificate
-WEBHOOK_SSL_PRIV = 'webhook_pkey.pem'  # Path to the ssl private key
+WEBHOOK_SSL_CERT = '/etc/ssl/certs/selfsigned.crt'  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = '/etc/ssl/private/selfsigned.key'  # Path to the ssl private key
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
