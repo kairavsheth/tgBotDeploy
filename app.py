@@ -7,8 +7,8 @@ import threading
 import pandas as pd
 from flask import Flask, render_template, request
 from flask_httpauth import HTTPBasicAuth
-from telebot import TeleBot, Update
-from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
+from telebot import TeleBot
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Update
 from werkzeug.security import check_password_hash, generate_password_hash
 
 WEBHOOK_SSL_CERT = 'webhook_cert.pem'  # Path to the ssl certificate
