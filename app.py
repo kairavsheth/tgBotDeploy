@@ -21,6 +21,7 @@ fileErrors: list = []
 botRunning: bool = False
 temp: pd.DataFrame = None
 
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 512
 try:
     with open('settings.bin', 'rb') as file_r:
         welcome_text: str = pickle.load(file_r)
@@ -153,7 +154,7 @@ def webhook():
         json_string = request.get_data().decode('utf-8')
         update = Update.de_json(json_string)
         bot.process_new_updates([update])
-        return ''
+        return {"ok": True}
     else:
         abort(403)
 
