@@ -20,8 +20,9 @@ bot = TeleBot('5085777113:AAHptWWZz_6KwyvlTCXPc2hMSvVw17pUU80')
 fileErrors: list = []
 botRunning: bool = False
 temp: pd.DataFrame = None
-
+print(app.config['MAX_CONTENT_LENGTH'])
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 512
+
 try:
     with open('settings.bin', 'rb') as file_r:
         welcome_text: str = pickle.load(file_r)
