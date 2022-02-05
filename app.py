@@ -27,10 +27,9 @@ userLog = open('userLog.csv', 'a', newline='')
 logWriter = csv.writer(userLog)
 
 
-def logActivity(date, username, action):
-    print(date)
-    if date:
-        date = datetime.fromtimestamp(date).replace(tzinfo=timezone.utc).astimezone(tz=None)
+def logActivity(dt, username, action):
+    if dt:
+        date = datetime.fromtimestamp(dt).replace(tzinfo=timezone.utc).astimezone(tz=None)
     else:
         date = datetime.now()
     logWriter.writerow([date.strftime('%Y-%m-%d %H:%M:%S'), username, action])
@@ -203,7 +202,7 @@ def startChat(message: Message):
 
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'parents')
 def back(callback: CallbackQuery):
-    logActivity(callback.date, callback.from_user.username, 'Back to Parents Menu')
+    logActivity(None, callback.from_user.username, 'Back to Parents Menu')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'parent': i, 'target': 'categories'}))] for i in parents]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -217,9 +216,7 @@ def back(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'categories')
 def showCategories(callback: CallbackQuery):
     parent = eval(callback.data)['parent']
-    print('a')
-    logActivity(callback.date, callback.from_user.username, f'Parent Selected: {parent}')
-    print('b')
+    logActivity(None, callback.from_user.username, f'Parent Selected: {parent}')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'category': i, 'target': 'products'}))]
                 for i in (categories[categories.parent == parent]).category]
@@ -236,7 +233,7 @@ def showCategories(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'products')
 def sendImages(callback: CallbackQuery):
     category = eval(callback.data)['category']
-    logActivity(callback.date, callback.from_user.username, f'Category Selected: {category}')
+    logActivity(None, callback.from_user.username, f'Category Selected: {category}')
     bot.edit_message_text(chat_id=callback.message.chat.id, message_id=callback.message.id,
                           text=f'{welcome_text.format(sendername=callback.from_user.first_name)}\n\n'
                                f'Category - {category}',
