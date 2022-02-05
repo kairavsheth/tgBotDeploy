@@ -4,7 +4,7 @@ import pickle
 import re
 import shutil
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 from flask import Flask, render_template, request, abort
@@ -28,8 +28,11 @@ logWriter = csv.writer(userLog)
 
 
 def logActivity(date, username, action):
-    date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-    logWriter.writerow([date, username, action])
+    if date:
+        date = datetime.fromtimestamp(date).replace(tzinfo=timezone.utc).astimezone(tz=None)
+    else:
+        date = datetime.now()
+    logWriter.writerow([date.strftime('%Y-%m-%d %H:%M:%S'), username, action])
 
 
 try:
