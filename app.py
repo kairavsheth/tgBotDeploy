@@ -163,7 +163,7 @@ def passwordPage():
 def activityPage():
     userLog.flush()
     with open('userLog.csv') as readLog:
-        return render_template('activity.html', log=csv.reader(readLog))
+        return render_template('activity.html', log=[i for i in csv.reader(readLog)])
 
 
 @app.route('/webhook', methods=['POST'])
@@ -213,7 +213,9 @@ def back(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'categories')
 def showCategories(callback: CallbackQuery):
     parent = eval(callback.data)['parent']
+    print('a')
     logActivity(callback.date, callback.from_user.username, f'Parent Selected: {parent}')
+    print('b')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'category': i, 'target': 'products'}))]
                 for i in (categories[categories.parent == parent]).category]
