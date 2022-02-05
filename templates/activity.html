@@ -2,18 +2,22 @@
 {% block content %}
 <h3>User Activity</h3>
 
-<table>
+<table border="1">
+    <thead>
     <tr>
         <th>Date & Time</th>
         <th>Username</th>
         <th>Activity</th>
     </tr>
+    </thead>
+    <tbody>
     {% for i in log %}
     <tr>
-        <td>{{ i['date'] }}</td>
-        <td><a href="https://t.me/{{ i['username'] }}">{{ i['username'] }}</a></td>
-        <td>{{ i['activity'] }}</td>
+        <td>{{ i[0] }}</td>
+        <td><a href="https://t.me/{{ i[1] }}">{{ i[1] }}</a></td>
+        <td>{{ i[2] }}</td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
 {% endblock %}

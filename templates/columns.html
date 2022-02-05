@@ -5,10 +5,13 @@
 <form method="post">
     <input hidden name="stage" value="columns">
     <table border="1">
+        <thead>
         <tr>
             <th>System Field</th>
             <th>Column in uploaded file</th>
         </tr>
+        </thead>
+        <tbody>
         {% for i in ['item', 'category', 'price', 'set', 'stock'] %}
         <tr>
             <td>{{ i }}</td>
@@ -20,6 +23,7 @@
             </select></td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
     <input type="submit" value="Update">
 </form>

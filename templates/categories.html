@@ -4,10 +4,13 @@
 <h3>Categories</h3>
 <form method="post">
     <table border="1">
+        <thead>
         <tr>
             <th><b>Category</b></th>
             <th><b>Parent</b></th>
         </tr>
+        </thead>
+        <tbody>
         {% for i in new %}
         <tr>
             <td>{{ i }}</td>
@@ -34,6 +37,7 @@
             </select></td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
     <input type="submit" value="Save">
 </form>
