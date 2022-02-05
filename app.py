@@ -27,12 +27,12 @@ userLog = open('userLog.csv', 'a', newline='')
 logWriter = csv.writer(userLog)
 
 
-def logActivity(dt, username, action):
+def logActivity(dt, user_id, name, username, action):
     if dt:
         date = datetime.fromtimestamp(dt).replace(tzinfo=timezone.utc).astimezone(tz=None)
     else:
         date = datetime.now()
-    logWriter.writerow([date.strftime('%Y-%m-%d %H:%M:%S'), username, action])
+    logWriter.writerow([date.strftime('%Y-%m-%d %H:%M:%S'), user_id, name, username, action])
 
 
 try:
@@ -190,7 +190,7 @@ def setWebhook():
 
 @bot.message_handler(commands=['start'])
 def startChat(message: Message):
-    logActivity(message.date, message.from_user.username, 'Start')
+    logActivity(message.date, message.from_user.id, message.from_user.first_name, message.from_user.username, 'Start')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'parent': i, 'target': 'categories'}))] for i in parents]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -202,7 +202,8 @@ def startChat(message: Message):
 
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'parents')
 def back(callback: CallbackQuery):
-    logActivity(None, callback.from_user.username, 'Back to Parents Menu')
+    logActivity(None, callback.from_user.id, callback.from_user.first_name, callback.from_user.username,
+                'Back to Parents Menu')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'parent': i, 'target': 'categories'}))] for i in parents]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -216,10 +217,10 @@ def back(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'categories')
 def showCategories(callback: CallbackQuery):
     parent = eval(callback.data)['parent']
-    logActivity(None, callback.from_user.username, f'Parent Selected: {parent}')
-    keyboard = [[InlineKeyboardButton(text=i,
-                                      callback_data=str({'category': i, 'target': 'products'}))]
-                for i in (categories[categories.parent == parent]).category]
+    logActivity(None, callback.from_user.id, callback.from_user.first_name, callback.from_user.username,
+                f'Parent Selected: {parent}')
+    keyboard = [[InlineKeyboardButton(text=i, callback_data=str({'category': i, 'target': 'products'}))] for i in
+                (categories[categories.parent == parent]).category]
     keyboard.append([InlineKeyboardButton(text='<<Back', callback_data=str({'target': 'parents'}))])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -233,7 +234,8 @@ def showCategories(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'products')
 def sendImages(callback: CallbackQuery):
     category = eval(callback.data)['category']
-    logActivity(None, callback.from_user.username, f'Category Selected: {category}')
+    logActivity(None, callback.from_user.id, callback.from_user.first_name, callback.from_user.username,
+                f'Category Selected: {category}')
     bot.edit_message_text(chat_id=callback.message.chat.id, message_id=callback.message.id,
                           text=f'{welcome_text.format(sendername=callback.from_user.first_name)}\n\n'
                                f'Category - {category}',
@@ -261,7 +263,8 @@ def sendImages(callback: CallbackQuery):
 
 @bot.message_handler()
 def standard(message: Message):
-    logActivity(message.date, message.from_user.username, f'Unsupported')
+    logActivity(message.date, message.from_user.id, message.from_user.first_name, message.from_user.username,
+                'Unsupported')
     bot.send_message(chat_id=message.chat.id, text='Please send /start and use the buttons to operate the chatbot.')
 
 
