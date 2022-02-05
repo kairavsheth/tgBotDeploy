@@ -28,6 +28,7 @@ logWriter = csv.writer(userLog)
 
 
 def logActivity(date, username, action):
+    print(date)
     if date:
         date = datetime.fromtimestamp(date).replace(tzinfo=timezone.utc).astimezone(tz=None)
     else:
