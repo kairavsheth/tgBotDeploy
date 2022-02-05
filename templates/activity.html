@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>User Activity</h3>
+
+<table>
+    <tr>
+        <th>Date & Time</th>
+        <th>Username</th>
+        <th>Activity</th>
+    </tr>
+    {% for i in log %}
+    <tr>
+        <td>{{ i['date'] }}</td>
+        <td><a href="https://t.me/{{ i['username'] }}">{{ i['username'] }}</a></td>
+        <td>{{ i['activity'] }}</td>
+    </tr>
+    {% enfor %}
+</table>
+{% endblock %}

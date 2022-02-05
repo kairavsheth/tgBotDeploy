@@ -1,8 +1,10 @@
+import csv
 import os
 import pickle
 import re
 import shutil
 import time
+from datetime import datetime
 
 import pandas as pd
 from flask import Flask, render_template, request, abort
@@ -19,7 +21,16 @@ auth = HTTPBasicAuth()
 bot = TeleBot('5198887063:AAEvQ1xtqpeCO4vcx0QdY6KOOUDCkeMYA28')
 fileErrors: list = []
 botRunning: bool = False
-temp: pd.DataFrame = None
+temp: pd.DataFrame
+
+userLog = open('userLog.csv', 'a', newline='')
+logWriter = csv.writer(userLog)
+
+
+def logActivity(date, username, action):
+    date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
+    logWriter.writerow([date, username, action])
+
 
 try:
     with open('settings.bin', 'rb') as file_r:
@@ -60,7 +71,7 @@ def statusPage():
     files = os.listdir('images')
     return render_template('status.html', missingImages=[row['item'] for i, row in products.iterrows() if
                                                          row.stock > 0 and not any([re.match(
-                                                             r"{filename} ?(\(\d\))?.jpeg".format(filename=row['item']),
+                                                             rf"{row['item']} ?(\(\d\))?.jpeg",
                                                              j) for j in files])],
                            hiddenCategories=categories[categories.parent == 'Hidden'].category.values)
 
@@ -88,8 +99,8 @@ def updatePage():
 @app.route('/categories', methods=['GET', 'POST'])
 @auth.login_required
 def categoriesPage():
+    global categories
     if request.method == 'POST':
-        global categories
         response = {'category': [], 'parent': []}
         for i in request.form:
             response['category'].append(i)
@@ -107,8 +118,8 @@ def categoriesPage():
 @app.route('/settings', methods=['GET', 'POST'])
 @auth.login_required
 def settingsPage():
+    global parents, welcome_text
     if request.method == 'POST':
-        global parents, welcome_text
         parents = list(set(request.form['parents'].split('\r\n')))
         welcome_text = request.form['welcome_text']
         with open('settings.bin', 'wb') as file_w:
@@ -125,7 +136,7 @@ def imagesPage():
     if request.method == 'POST':
         uploaded_files = request.files.getlist("file")
         for i in uploaded_files:
-            with open('images/{filename}'.format(filename=i.filename), 'wb') as img:
+            with open(f'images/{i.filename}', 'wb') as img:
                 shutil.copyfileobj(i.stream, img)
         return render_template('uploadImgs.html', message='Images uploaded.')
     return render_template('uploadImgs.html')
@@ -145,6 +156,14 @@ def passwordPage():
         pickle.dump(users, open('users.bin', 'wb'))
         return render_template('password.html', message='Password changed.')
     return render_template('password.html')
+
+
+@app.route('/activity', methods=['GET'])
+@auth.login_required
+def activityPage():
+    userLog.flush()
+    with open('userLog.csv') as readLog:
+        return render_template('activity.html', log=csv.reader(readLog))
 
 
 @app.route('/webhook', methods=['POST'])
@@ -168,22 +187,25 @@ def setWebhook():
 
 @bot.message_handler(commands=['start'])
 def startChat(message: Message):
+    logActivity(message.date, message.from_user.username, 'Start')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'parent': i, 'target': 'categories'}))] for i in parents]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    bot.send_message(message.chat.id, text='{welcome_text}\n\nPlease select the category to continue:'.format(
-        welcome_text=welcome_text.format(sendername=message.from_user.first_name)),
+    bot.send_message(message.chat.id,
+                     text=f'{welcome_text.format(sendername=message.from_user.first_name)}\n\nPlease select the '
+                          f'category to continue:',
                      reply_markup=reply_markup)
 
 
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'parents')
 def back(callback: CallbackQuery):
+    logActivity(callback.date, callback.from_user.username, 'Back to Parents Menu')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'parent': i, 'target': 'categories'}))] for i in parents]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.edit_message_text(chat_id=callback.message.chat.id, message_id=callback.message.id,
-                          text='{welcome_text}\n\nPlease select the category to continue:'.format(
-                              welcome_text=welcome_text.format(sendername=callback.from_user.first_name)),
+                          text=f'{welcome_text.format(sendername=callback.from_user.first_name)}\n\nPlease select the '
+                               f'category to continue:',
                           inline_message_id=callback.inline_message_id,
                           reply_markup=reply_markup)
 
@@ -191,6 +213,7 @@ def back(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'categories')
 def showCategories(callback: CallbackQuery):
     parent = eval(callback.data)['parent']
+    logActivity(callback.date, callback.from_user.username, f'Parent Selected: {parent}')
     keyboard = [[InlineKeyboardButton(text=i,
                                       callback_data=str({'category': i, 'target': 'products'}))]
                 for i in (categories[categories.parent == parent]).category]
@@ -198,9 +221,8 @@ def showCategories(callback: CallbackQuery):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     bot.edit_message_text(chat_id=callback.message.chat.id, message_id=callback.message.id,
-                          text='{welcome_text}\n\nCategory - {parent}'.format(
-                              welcome_text=welcome_text.format(sendername=callback.from_user.first_name),
-                              parent=parent),
+                          text=f'{welcome_text.format(sendername=callback.from_user.first_name)}\n\n'
+                               f'Category - {parent}',
                           inline_message_id=callback.inline_message_id,
                           reply_markup=reply_markup)
 
@@ -208,20 +230,19 @@ def showCategories(callback: CallbackQuery):
 @bot.callback_query_handler(lambda callback: eval(callback.data)['target'] == 'products')
 def sendImages(callback: CallbackQuery):
     category = eval(callback.data)['category']
+    logActivity(callback.date, callback.from_user.username, f'Category Selected: {category}')
     bot.edit_message_text(chat_id=callback.message.chat.id, message_id=callback.message.id,
-                          text='{welcome_text}\n\nCategory - {category}'.format(
-                              welcome_text=welcome_text.format(sendername=callback.from_user.first_name),
-                              category=category),
+                          text=f'{welcome_text.format(sendername=callback.from_user.first_name)}\n\n'
+                               f'Category - {category}',
                           inline_message_id=callback.inline_message_id,
                           reply_markup=None)
 
     for i, row in products[products.category == category].iterrows():
         if row.stock > 0:
-            imgs = [InputMediaPhoto(media=open('images/{filename}'.format(filename=j), 'rb'), ) for j in
-                    os.listdir('images') if
-                    re.match(r"{filename} ?(\(\d\))?.jpeg".format(filename=row['item']), j)]
+            imgs = [InputMediaPhoto(media=open(f'images/{j}', 'rb'), ) for j in os.listdir('images') if
+                    re.match(rf"{row['item']} ?(\(\d\))?.jpeg", j)]
             if len(imgs) > 0:
-                imgs[-1].caption = 'Price: ₹{price:.2F}\n{set} pcs/set'.format(price=row['price'], set=row['set'])
+                imgs[-1].caption = f'Price: ₹{row["price"]:.2F}\n{row["set"]} pcs/set'
             while len(imgs) > 0:
                 bot.send_media_group(chat_id=callback.message.chat.id, media=imgs[0:10])
                 imgs = imgs[10:]
@@ -237,6 +258,7 @@ def sendImages(callback: CallbackQuery):
 
 @bot.message_handler()
 def standard(message: Message):
+    logActivity(message.date, message.from_user.username, f'Unsupported')
     bot.send_message(chat_id=message.chat.id, text='Please send /start and use the buttons to operate the chatbot.')
 
 
